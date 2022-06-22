@@ -1,20 +1,34 @@
 import { useState } from "react";
+import axios from "axios";
+import { API_URL } from "./Api";
 
 const CreateBlog = () => {
   const [blog, setBlog] = useState({
     author: "",
     title: "",
-    body: "",
+    content: "",
   });
 
   const handleChange = (e) => {
-    setBlog((state) => ({ ...state, [e.target.name]: e.target.value }));
+    setBlog({ ...blog, [e.target.name]: e.target.value });
   };
 
-  // const handleSubmit = async (e)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try{ 
+      await axios.post(API_URL, blog)  
+    }catch {
+      console.log("Error")
+    }
+    setBlog({
+      author: "",
+      title: "",
+      content: "",
+    })
+  };
 
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <div className="field">
         <label>
           Author:
@@ -48,8 +62,8 @@ const CreateBlog = () => {
             col="30"
             rows="10"
             type="text"
-            name="body"
-            value={blog.body}
+            name="content"
+            value={blog.content}
             onChange={handleChange}
             required
           />
