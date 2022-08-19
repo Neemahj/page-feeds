@@ -6,53 +6,31 @@ import { FaRegEdit } from "react-icons/fa";
 const BlogPage = () => {
   const [displayBlogs, setDisplayBlogs] = useState([]);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [noData, setNoData] = useState(false);
+  const [maxPage, setMaxPage] = useState(1);
 
-  const getBlog = async (page) => {
-    try {
-      let url;
-      if ((page != null) && (page > 1)) {
-        url = `${API_URL}?page=${page}`;
-      } else {
-        url = API_URL;
+
+  useEffect(() => {
+    const getBlog = async () => {
+      try{
+        const {data} = await axios.get(`${API_URL}?page=${page}`);
+        setMaxPage(data.getBlogPost.pages)
+        setDisplayBlogs((previousPost)=> [...previousPost, ...data.getBlogPost.docs]);
+    
+      }catch (error){
+        console.log(error)
       }
-      const { data } = await axios.get(url);
-      setDisplayBlogs(data.getBlogPost.docs);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    };
+    getBlog()
+  }, [page])
   
-
   window.onscroll = () => {
     if (
       window.innerHeight + document.documentElement.scrollTop ===
       document.documentElement.offsetHeight
     ) {
-      if (!noData) {
-        loadBlogs(page);
+      setPage(page + 1)
       }
-    }
-  }
-
-  useEffect(() => {
-      loadBlogs(page);
-  },[]);
-
-  const loadBlogs = (page) => {
-    setLoading(true);
-    setTimeout(() => {
-      getBlog(page)
-          setDisplayBlogs((previousPost)=> [...previousPost, ...displayBlogs])
-          const newPage = page + 1;
-          setPage(newPage);    
-          if(!(displayBlogs)){
-            setNoData(true); 
-          }     
-      }
-    ,1500);
-  }
+    };
 
   const handleDelete = async (id) => {
     try {
@@ -88,9 +66,8 @@ const BlogPage = () => {
         );
       })}
 
-      <div  className="loading-text">
-         {loading ? <div className="text-center">Loading data ...</div> : ""}
-         {noData ? <div className="text-center">End of Data ...</div> : ""}
+      <div className="loading-text">
+        <div className="text-center">{ page > maxPage ? 'End of Data' :'Loading Data'}</div>
       </div>
       
     </div>
